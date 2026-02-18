@@ -1,0 +1,5 @@
+/home/noid/cpp_projects/test_github_issues_viewer/project/build/CMakeFiles/app.dir
+/home/noid/cpp_projects/test_github_issues_viewer/project/build/CMakeFiles/edit_cache.dir
+/home/noid/cpp_projects/test_github_issues_viewer/project/build/CMakeFiles/rebuild_cache.dir
+/home/noid/cpp_projects/test_github_issues_viewer/project/build/CMakeFiles/app_autogen_timestamp_deps.dir
+/home/noid/cpp_projects/test_github_issues_viewer/project/build/CMakeFiles/app_autogen.dir
