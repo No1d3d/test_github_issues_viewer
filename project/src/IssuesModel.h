@@ -27,6 +27,7 @@ signals:
     void errorChanged();
 
 private:
+    void saveToCache();
     void appendIssues(const QJsonArray& array);
     void setError(const QString& err);
 

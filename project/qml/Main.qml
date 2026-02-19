@@ -11,7 +11,7 @@ ApplicationWindow {
     ColumnLayout {
         anchors.fill: parent
         spacing: 10
-        Layout.margins: 10   // <-- заменили padding на Layout.margins
+        Layout.margins: 10
 
         RowLayout {
             spacing: 5
@@ -37,11 +37,6 @@ ApplicationWindow {
                     issuesModel.load(repoField.text)
                 }
             }
-
-            Button {
-                text: "Next page"
-                onClicked: issuesModel.loadNextPage()
-            }
         }
 
         Text {
@@ -51,9 +46,11 @@ ApplicationWindow {
         }
 
         ListView {
+            id: listView
             Layout.fillWidth: true
             Layout.fillHeight: true
             model: issuesModel
+            clip: true
 
             delegate: Rectangle {
                 width: ListView.view.width
@@ -64,6 +61,12 @@ ApplicationWindow {
                     anchors.centerIn: parent
                     text: title
                     wrapMode: Text.Wrap
+                }
+            }
+
+            onContentYChanged: {
+                if (contentY + height >= contentHeight - 50) {
+                    issuesModel.loadNextPage()
                 }
             }
         }

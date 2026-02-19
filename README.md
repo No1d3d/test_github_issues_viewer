@@ -7,3 +7,10 @@
 - Qt
 - QML
 - Cmake
+
+# To run code
+mkdir build
+cd build
+cmake -G Ninja ..
+ninja
+QT_QPA_PLATFORM=xcb ./app

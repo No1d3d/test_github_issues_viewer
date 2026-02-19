@@ -56,19 +56,39 @@ void IssuesModel::loadNextPage()
     m_client.fetchIssues(m_repo, m_page);
 }
 
+void IssuesModel::saveToCache()
+{
+    QJsonArray array;
+
+    for (const auto &item : m_data) {
+        QJsonObject obj;
+        obj["title"] = item.first;
+        obj["html_url"] = item.second;
+        array.append(obj);
+    }
+
+    OfflineCache::save(m_repo, array);
+}
+
 void IssuesModel::appendIssues(const QJsonArray &array)
 {
-    if (array.isEmpty()) return;
+    if (array.isEmpty())
+        return;
 
     beginInsertRows(QModelIndex(), m_data.size(), m_data.size() + array.size() - 1);
 
     for (const auto &val : array) {
-        auto obj = val.toObject();
-        m_data.append({ obj["title"].toString(), obj["html_url"].toString() });
+        QJsonObject obj = val.toObject();
+
+        QString title = obj["title"].toString();
+        QString url   = obj["html_url"].toString();
+
+        m_data.append({ title, url });
     }
 
     endInsertRows();
-    OfflineCache::save(m_repo, array);
+
+    saveToCache();
 }
 
 void IssuesModel::setToken(const QString &token) { m_client.setToken(token); }
