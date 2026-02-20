@@ -2,52 +2,63 @@
 #include <QDir>
 #include <QFile>
 #include <QJsonDocument>
-#include <QJsonObject>
 #include <QCoreApplication>
-#include <QDateTime>
+#include <QStandardPaths>
 
+QString OfflineCache::m_cacheDir;
 
-static QString cacheDir()
+void OfflineCache::setCacheDir(const QString& path)
 {
-    QString base = QCoreApplication::applicationDirPath();
-    QString path = base + "/offline_cache";
-
+    m_cacheDir = path;
     QDir dir;
-    if (!dir.exists(path))
-        dir.mkpath(path);
-
-    return path;
+    if (!dir.exists(m_cacheDir))
+        dir.mkpath(m_cacheDir);
 }
 
-static QString cachePath(const QString& repo)
+QString OfflineCache::getCachePath(const QString& repo)
 {
+    if (m_cacheDir.isEmpty()) {
+        m_cacheDir = QDir::current().absolutePath() + "/cache";
+        QDir().mkpath(m_cacheDir);
+    }
+    
     QString sanitized = repo;
     sanitized.replace("/", "_");
+    sanitized.replace(":", "_");
+    sanitized.replace(".", "_");
+    sanitized.replace("\\", "_");
 
-    return cacheDir() + "/" + sanitized + ".json";
+    return m_cacheDir + "/" + sanitized + ".json";
 }
 
-void OfflineCache::save(const QString& repo, const QJsonArray& issues)
+void OfflineCache::save(const QString& repo, const QJsonObject& data)
 {
-    QJsonObject root;
-    root["repo"] = repo;
-    root["timestamp"] = QDateTime::currentSecsSinceEpoch();
-    root["issues"] = issues;
-
-    QFile file(cachePath(repo));
-    if (file.open(QIODevice::WriteOnly))
-        file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+    QFile file(getCachePath(repo));
+    if (file.open(QIODevice::WriteOnly)) {
+        QJsonDocument doc(data);
+        file.write(doc.toJson(QJsonDocument::Indented));
+        file.close();
+    }
 }
 
-QJsonArray OfflineCache::load(const QString& repo)
+QJsonObject OfflineCache::load(const QString& repo)
 {
-    QFile file(cachePath(repo));
+    QFile file(getCachePath(repo));
     if (!file.open(QIODevice::ReadOnly))
         return {};
 
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    file.close();
+    
     if (!doc.isObject())
         return {};
 
-    return doc.object()["issues"].toArray();
+    return doc.object();
+}
+
+void OfflineCache::clear(const QString& repo)
+{
+    QFile file(getCachePath(repo));
+    if (file.exists())
+        file.remove();
 }
